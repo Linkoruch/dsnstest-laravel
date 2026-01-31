@@ -1,12 +1,12 @@
 <div>
     <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <!-- Заголовок -->
                     <div class="mb-6">
                         <h2 class="text-2xl font-bold text-gray-800">Редагувати тест</h2>
-                        <p class="text-gray-600 mt-1">Оновіть дані тесту</p>
+                        <p class="text-gray-600 mt-1">Оновіть дані тесту та питання</p>
                     </div>
 
                     <form wire:submit.prevent="update">
@@ -42,78 +42,170 @@
                             @enderror
                         </div>
 
-                        <!-- Поточний файл -->
+                        <!-- Питання -->
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Поточний файл з питаннями
-                            </label>
-                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                <div class="flex items-center">
-                                    <svg class="w-5 h-5 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path>
+                            <div class="flex justify-between items-center mb-4">
+                                <label class="block text-sm font-medium text-gray-700">
+                                    Питання <span class="text-red-500">*</span>
+                                </label>
+                                <button
+                                    type="button"
+                                    wire:click="addQuestion"
+                                    class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg shadow-md transition duration-150">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                     </svg>
-                                    <span class="text-sm text-gray-700">{{ basename($test->questions_file_path) }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Новий файл з питаннями (опціонально) -->
-                        <div class="mb-6">
-                            <label for="questionsFile" class="block text-sm font-medium text-gray-700 mb-2">
-                                Замінити файл з питаннями (опціонально)
-                            </label>
-                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg @error('questionsFile') border-red-500 @enderror">
-                                <div class="space-y-1 text-center">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    <div class="flex text-sm text-gray-600">
-                                        <label for="questionsFile" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
-                                            <span>Завантажити файл</span>
-                                            <input id="questionsFile" type="file" wire:model="questionsFile" class="sr-only" accept=".json">
-                                        </label>
-                                        <p class="pl-1">або перетягніть сюди</p>
-                                    </div>
-                                    <p class="text-xs text-gray-500">JSON до 2MB</p>
-                                </div>
+                                    Додати питання
+                                </button>
                             </div>
 
-                            @if ($questionsFile)
-                                <div class="mt-2 flex items-center text-sm text-green-600">
-                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    Новий файл: {{ $questionsFile->getClientOriginalName() }}
-                                </div>
-                            @endif
-
-                            @error('questionsFile')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @error('questions')
+                                <p class="mb-4 text-sm text-red-600">{{ $message }}</p>
                             @enderror
 
-                            <!-- Підказка про формат -->
-                            <div class="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                <p class="text-sm text-blue-800 font-medium mb-2">Формат JSON файлу:</p>
-                                <pre class="text-xs text-blue-700 overflow-x-auto">{
-  "questions": [
-    {
-      "question_id": 1,
-      "question_text": "What is 2+2?",
-      "options": {
-        "A": "3",
-        "B": "4",
-        "C": "5",
-        "D": "6"
-      },
-      "correct_answer": "B"
-    }
-  ]
-}</pre>
+                            <!-- Список питань -->
+                            <div class="space-y-6">
+                                @foreach($questions as $index => $question)
+                                    <div class="border border-gray-300 rounded-lg p-6 bg-gray-50">
+                                        <div class="flex justify-between items-center mb-4">
+                                            <h3 class="text-lg font-semibold text-gray-800">Питання #{{ $index + 1 }}</h3>
+                                            @if(count($questions) > 1)
+                                                <button
+                                                    type="button"
+                                                    wire:click="removeQuestion({{ $index }})"
+                                                    class="text-red-600 hover:text-red-800 transition duration-150"
+                                                    title="Видалити питання">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            @endif
+                                        </div>
+
+                                        <!-- Текст питання -->
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                Текст питання <span class="text-red-500">*</span>
+                                            </label>
+                                            <textarea
+                                                wire:model="questions.{{ $index }}.question_text"
+                                                rows="2"
+                                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('questions.'.$index.'.question_text') border-red-500 @else border-gray-300 @enderror"
+                                                placeholder="Введіть текст питання"></textarea>
+                                            @error('questions.'.$index.'.question_text')
+                                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+
+                                        <!-- Варіанти відповідей -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                    Варіант A <span class="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    wire:model="questions.{{ $index }}.option_a"
+                                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('questions.'.$index.'.option_a') border-red-500 @else border-gray-300 @enderror"
+                                                    placeholder="Варіант A">
+                                                @error('questions.'.$index.'.option_a')
+                                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                    Варіант B <span class="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    wire:model="questions.{{ $index }}.option_b"
+                                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('questions.'.$index.'.option_b') border-red-500 @else border-gray-300 @enderror"
+                                                    placeholder="Варіант B">
+                                                @error('questions.'.$index.'.option_b')
+                                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                    Варіант C <span class="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    wire:model="questions.{{ $index }}.option_c"
+                                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('questions.'.$index.'.option_c') border-red-500 @else border-gray-300 @enderror"
+                                                    placeholder="Варіант C">
+                                                @error('questions.'.$index.'.option_c')
+                                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                    Варіант D <span class="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    wire:model="questions.{{ $index }}.option_d"
+                                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('questions.'.$index.'.option_d') border-red-500 @else border-gray-300 @enderror"
+                                                    placeholder="Варіант D">
+                                                @error('questions.'.$index.'.option_d')
+                                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <!-- Правильна відповідь -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                Правильна відповідь <span class="text-red-500">*</span>
+                                            </label>
+                                            <div class="flex gap-4">
+                                                <label class="inline-flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        wire:model="questions.{{ $index }}.correct_answer"
+                                                        value="A"
+                                                        class="form-radio text-blue-600">
+                                                    <span class="ml-2">A</span>
+                                                </label>
+                                                <label class="inline-flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        wire:model="questions.{{ $index }}.correct_answer"
+                                                        value="B"
+                                                        class="form-radio text-blue-600">
+                                                    <span class="ml-2">B</span>
+                                                </label>
+                                                <label class="inline-flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        wire:model="questions.{{ $index }}.correct_answer"
+                                                        value="C"
+                                                        class="form-radio text-blue-600">
+                                                    <span class="ml-2">C</span>
+                                                </label>
+                                                <label class="inline-flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        wire:model="questions.{{ $index }}.correct_answer"
+                                                        value="D"
+                                                        class="form-radio text-blue-600">
+                                                    <span class="ml-2">D</span>
+                                                </label>
+                                            </div>
+                                            @error('questions.'.$index.'.correct_answer')
+                                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
 
                         <!-- Кнопки -->
-                        <div class="flex justify-end gap-3">
+                        <div class="flex justify-end gap-3 mt-6">
                             <a href="{{ route('tests.index') }}"
                                class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-150">
                                 Скасувати

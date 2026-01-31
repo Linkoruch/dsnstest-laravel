@@ -4,22 +4,39 @@ namespace App\Livewire\Tests;
 
 use App\Models\Test;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 class EditTest extends Component
 {
-    use WithFileUploads;
-
     public Test $test;
     public $name;
     public $description;
-    public $questionsFile;
+    public $questions = [];
 
     public function mount(Test $test)
     {
         $this->test = $test;
         $this->name = $test->name;
         $this->description = $test->description;
+
+        // Завантажуємо питання з JSON файлу
+        $existingQuestions = $test->getQuestions();
+        if ($existingQuestions && isset($existingQuestions['questions'])) {
+            foreach ($existingQuestions['questions'] as $question) {
+                $this->questions[] = [
+                    'question_text' => $question['question_text'],
+                    'option_a' => $question['options']['A'],
+                    'option_b' => $question['options']['B'],
+                    'option_c' => $question['options']['C'],
+                    'option_d' => $question['options']['D'],
+                    'correct_answer' => $question['correct_answer'],
+                ];
+            }
+        }
+
+        // Якщо немає питань, додаємо одне порожнє
+        if (empty($this->questions)) {
+            $this->addQuestion();
+        }
     }
 
     protected function rules()
@@ -27,50 +44,91 @@ class EditTest extends Component
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'questionsFile' => 'nullable|file|mimes:json|max:2048',
+            'questions' => 'required|array|min:1',
+            'questions.*.question_text' => 'required|string',
+            'questions.*.option_a' => 'required|string',
+            'questions.*.option_b' => 'required|string',
+            'questions.*.option_c' => 'required|string',
+            'questions.*.option_d' => 'required|string',
+            'questions.*.correct_answer' => 'required|in:A,B,C,D',
         ];
     }
 
     protected $messages = [
         'name.required' => 'Назва тесту є обов\'язковою',
         'name.max' => 'Назва тесту не може перевищувати 255 символів',
-        'questionsFile.mimes' => 'Файл повинен бути у форматі JSON',
-        'questionsFile.max' => 'Файл не може перевищувати 2MB',
+        'questions.required' => 'Додайте хоча б одне питання',
+        'questions.min' => 'Додайте хоча б одне питання',
+        'questions.*.question_text.required' => 'Текст питання є обов\'язковим',
+        'questions.*.option_a.required' => 'Варіант A є обов\'язковим',
+        'questions.*.option_b.required' => 'Варіант B є обов\'язковим',
+        'questions.*.option_c.required' => 'Варіант C є обов\'язковим',
+        'questions.*.option_d.required' => 'Варіант D є обов\'язковим',
+        'questions.*.correct_answer.required' => 'Оберіть правильну відповідь',
     ];
+
+    public function addQuestion()
+    {
+        $this->questions[] = [
+            'question_text' => '',
+            'option_a' => '',
+            'option_b' => '',
+            'option_c' => '',
+            'option_d' => '',
+            'correct_answer' => 'A',
+        ];
+    }
+
+    public function removeQuestion($index)
+    {
+        unset($this->questions[$index]);
+        $this->questions = array_values($this->questions);
+    }
 
     public function update()
     {
         $this->validate();
 
-        $data = [
-            'name' => $this->name,
-            'description' => $this->description,
+        // Формуємо JSON структуру
+        $jsonData = [
+            'questions' => []
         ];
 
-        // Якщо завантажено новий файл
-        if ($this->questionsFile) {
-            // Перевірка формату JSON
-            $content = file_get_contents($this->questionsFile->getRealPath());
-            $jsonData = json_decode($content, true);
-
-            if (!$jsonData || !isset($jsonData['questions']) || !is_array($jsonData['questions'])) {
-                $this->addError('questionsFile', 'Невірний формат JSON файлу. Очікується структура з полем "questions"');
-                return;
-            }
-
-            // Видаляємо старий файл
-            if ($this->test->questions_file_path && file_exists(storage_path('app/' . $this->test->questions_file_path))) {
-                unlink(storage_path('app/' . $this->test->questions_file_path));
-            }
-
-            // Зберігаємо новий файл
-            $fileName = 'tests/questions_' . time() . '_' . uniqid() . '.json';
-            $this->questionsFile->storeAs('', $fileName);
-
-            $data['questions_file_path'] = $fileName;
+        foreach ($this->questions as $index => $question) {
+            $jsonData['questions'][] = [
+                'question_id' => $index + 1,
+                'question_text' => $question['question_text'],
+                'options' => [
+                    'A' => $question['option_a'],
+                    'B' => $question['option_b'],
+                    'C' => $question['option_c'],
+                    'D' => $question['option_d'],
+                ],
+                'correct_answer' => $question['correct_answer'],
+            ];
         }
 
-        $this->test->update($data);
+        // Видаляємо старий JSON файл
+        if ($this->test->questions_file_path && file_exists(storage_path('app/' . $this->test->questions_file_path))) {
+            unlink(storage_path('app/' . $this->test->questions_file_path));
+        }
+
+        // Створюємо новий JSON файл
+        $fileName = 'tests/questions_' . time() . '_' . uniqid() . '.json';
+        $filePath = storage_path('app/' . $fileName);
+
+        if (!is_dir(dirname($filePath))) {
+            mkdir(dirname($filePath), 0755, true);
+        }
+
+        file_put_contents($filePath, json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        // Оновлюємо тест
+        $this->test->update([
+            'name' => $this->name,
+            'description' => $this->description,
+            'questions_file_path' => $fileName,
+        ]);
 
         session()->flash('message', 'Тест успішно оновлено!');
 
@@ -79,6 +137,6 @@ class EditTest extends Component
 
     public function render()
     {
-        return view('livewire.tests.edit-test')->layout('layouts.app');;
+        return view('livewire.tests.edit-test')->layout('layouts.app');
     }
 }
