@@ -15,7 +15,7 @@ class RolesSeeder extends Seeder
         // Створюємо роль адміністратора
         Role::firstOrCreate(['name' => 'admin'], ['guard_name' => 'web']);
 
-        // Створюємо роль студента
-        Role::firstOrCreate(['name' => 'student'], ['guard_name' => 'web']);
+        // Створюємо роль користувача
+        Role::firstOrCreate(['name' => 'user'], ['guard_name' => 'web']);
     }
 }

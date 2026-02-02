@@ -26,11 +26,11 @@ class DatabaseSeeder extends Seeder
 
         // User::factory(10)->create();
 
-        // Створюємо тестового користувача зі студентською роллю
+        // Створюємо тестового користувача
         $testUser = User::factory()->create([
-            'name' => 'Test Student',
-            'email' => 'student@example.com',
+            'name' => 'Test User',
+            'email' => 'user@example.com',
         ]);
-        $testUser->assignRole('student');
+        $testUser->assignRole('user');
     }
 }

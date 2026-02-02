@@ -3,6 +3,7 @@
 namespace App\Livewire\Tests;
 
 use App\Models\Test;
+use App\Models\User;
 use Livewire\Component;
 
 class EditTest extends Component
@@ -11,12 +12,29 @@ class EditTest extends Component
     public $name;
     public $description;
     public $questions = [];
+    public $successMessage = '';
+    public $assignToAll = false;
+    public $selectedUsers = [];
+    public $availableUsers = [];
 
     public function mount(Test $test)
     {
         $this->test = $test;
         $this->name = $test->name;
         $this->description = $test->description;
+
+        // Завантажуємо список користувачів з роллю user
+        $this->availableUsers = User::role('user')->get(['id', 'name', 'email'])->toArray();
+
+        // Завантажуємо призначених користувачів
+        $assignedUsers = $test->getAssignedUserIds();
+        if (empty($assignedUsers) || in_array('all', $assignedUsers)) {
+            $this->assignToAll = true;
+            $this->selectedUsers = [];
+        } else {
+            $this->assignToAll = false;
+            $this->selectedUsers = array_map('intval', $assignedUsers); // Перетворюємо на int
+        }
 
         // Завантажуємо питання з JSON файлу
         $existingQuestions = $test->getQuestions();
@@ -35,7 +53,7 @@ class EditTest extends Component
 
         // Якщо немає питань, додаємо одне порожнє
         if (empty($this->questions)) {
-            $this->addQuestion();
+            $this->addQuestion(false); // false = не прокручувати при mount
         }
     }
 
@@ -67,7 +85,7 @@ class EditTest extends Component
         'questions.*.correct_answer.required' => 'Оберіть правильну відповідь',
     ];
 
-    public function addQuestion()
+    public function addQuestion($triggerScroll = true)
     {
         $this->questions[] = [
             'question_text' => '',
@@ -77,6 +95,11 @@ class EditTest extends Component
             'option_d' => '',
             'correct_answer' => 'A',
         ];
+
+        // Викликаємо подію для прокручування вниз ТІЛЬКИ якщо це ручне додавання
+        if ($triggerScroll) {
+            $this->dispatch('questionAdded');
+        }
     }
 
     public function removeQuestion($index)
@@ -123,16 +146,22 @@ class EditTest extends Component
 
         file_put_contents($filePath, json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
+        // Визначаємо список користувачів
+        $assignedUsers = $this->assignToAll ? ['all'] : $this->selectedUsers;
+
         // Оновлюємо тест
         $this->test->update([
             'name' => $this->name,
             'description' => $this->description,
             'questions_file_path' => $fileName,
+            'assigned_users' => $assignedUsers,
         ]);
 
-        session()->flash('message', 'Тест успішно оновлено!');
+        // Показуємо повідомлення про успіх (залишаємось на сторінці)
+        $this->successMessage = 'Тест успішно оновлено!';
 
-        return redirect()->route('tests.index');
+        // Dispatch події для можливого використання в JavaScript
+        $this->dispatch('test-updated');
     }
 
     public function render()

@@ -43,12 +43,20 @@ new class extends Component {
                         <x-nav-link :href="route('tests.index')" :active="request()->routeIs('tests.*')" wire:navigate>
                             {{ __('Управління тестами') }}
                         </x-nav-link>
+
+                        <x-nav-link :href="route('results.index')" :active="request()->routeIs('results.*')" wire:navigate>
+                            {{ __('Результати') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate>
+                            {{ __('Користувачі') }}
+                        </x-nav-link>
                     @endrole
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-3">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
@@ -71,15 +79,17 @@ new class extends Component {
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Profile') }}
                         </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <button wire:click="logout" class="w-full text-start">
-                            <x-dropdown-link>
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </button>
                     </x-slot>
                 </x-dropdown>
+
+                <!-- Logout Button -->
+                <button wire:click="logout"
+                        class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    {{ __('Вийти') }}
+                </button>
             </div>
 
             <!-- Hamburger -->
@@ -109,6 +119,14 @@ new class extends Component {
                 <x-responsive-nav-link :href="route('tests.index')" :active="request()->routeIs('tests.*')" wire:navigate>
                     {{ __('Управління тестами') }}
                 </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('results.index')" :active="request()->routeIs('results.*')" wire:navigate>
+                    {{ __('Результати') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate>
+                    {{ __('Користувачі') }}
+                </x-responsive-nav-link>
             @endrole
         </div>
 
@@ -126,12 +144,17 @@ new class extends Component {
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
-                <!-- Authentication -->
-                <button wire:click="logout" class="w-full text-start">
-                    <x-responsive-nav-link>
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </button>
+
+                <!-- Prominent Logout Button for Mobile -->
+                <div class="px-4 pt-2">
+                    <button wire:click="logout"
+                            class="w-full inline-flex items-center justify-center px-4 py-3 bg-red-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        {{ __('Вийти з облікового запису') }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>

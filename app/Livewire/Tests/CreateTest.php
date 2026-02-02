@@ -3,6 +3,7 @@
 namespace App\Livewire\Tests;
 
 use App\Models\Test;
+use App\Models\User;
 use Livewire\Component;
 
 class CreateTest extends Component
@@ -10,11 +11,18 @@ class CreateTest extends Component
     public $name = '';
     public $description = '';
     public $questions = [];
+    public $successMessage = '';
+    public $assignToAll = true; // За замовчуванням - всім
+    public $selectedUsers = [];
+    public $availableUsers = [];
 
     public function mount()
     {
+        // Завантажуємо список користувачів з роллю user
+        $this->availableUsers = User::role('user')->get(['id', 'name', 'email'])->toArray();
+
         // Додаємо одне порожнє питання для початку
-        $this->addQuestion();
+        $this->addQuestion(false); // false = не прокручувати при mount
     }
 
     protected function rules()
@@ -45,7 +53,7 @@ class CreateTest extends Component
         'questions.*.correct_answer.required' => 'Оберіть правильну відповідь',
     ];
 
-    public function addQuestion()
+    public function addQuestion($triggerScroll = true)
     {
         $this->questions[] = [
             'question_text' => '',
@@ -55,6 +63,11 @@ class CreateTest extends Component
             'option_d' => '',
             'correct_answer' => 'A',
         ];
+
+        // Викликаємо подію для прокручування вниз ТІЛЬКИ якщо це ручне додавання
+        if ($triggerScroll) {
+            $this->dispatch('questionAdded');
+        }
     }
 
     public function removeQuestion($index)
@@ -97,16 +110,27 @@ class CreateTest extends Component
 
         file_put_contents($filePath, json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
+        // Визначаємо список користувачів
+        $assignedUsers = $this->assignToAll ? ['all'] : $this->selectedUsers;
+
         // Створюємо тест
         Test::create([
             'name' => $this->name,
             'description' => $this->description,
             'questions_file_path' => $fileName,
+            'assigned_users' => $assignedUsers,
         ]);
 
-        session()->flash('message', 'Тест успішно створено!');
+        // Показуємо повідомлення про успіх (залишаємось на сторінці)
+        $this->successMessage = 'Тест успішно створено!';
 
-        return redirect()->route('tests.index');
+        // Скидаємо форму для створення нового тесту
+        $this->reset(['name', 'description', 'questions', 'selectedUsers']);
+        $this->assignToAll = true;
+        $this->addQuestion(false); // Додаємо одне порожнє питання
+
+        // Dispatch події для можливого використання в JavaScript
+        $this->dispatch('test-created');
     }
 
     public function render()
