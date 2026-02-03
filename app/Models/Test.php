@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Test extends Model
 {
@@ -41,11 +42,11 @@ class Test extends Model
      */
     public function getQuestions(): ?array
     {
-        if (!$this->questions_file_path || !file_exists(storage_path('app/' . $this->questions_file_path))) {
+        if (!$this->questions_file_path || !Storage::exists($this->questions_file_path)) {
             return null;
         }
 
-        $content = file_get_contents(storage_path('app/' . $this->questions_file_path));
+        $content = Storage::get($this->questions_file_path);
         return json_decode($content, true);
     }
 

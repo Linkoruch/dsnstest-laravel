@@ -38,6 +38,7 @@ class AvailableTests extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(9);
 
+
         return view('livewire.user-tests.available-tests', [
             'tests' => $tests
         ])->layout('layouts.app');

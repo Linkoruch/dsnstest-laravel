@@ -22,7 +22,7 @@ new class extends Component {
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate>
+                    <a href="{{ route('user.tests') }}" wire:navigate>
                         {{--                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />--}}
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                              stroke="currentColor" class="size-6">
@@ -35,22 +35,36 @@ new class extends Component {
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+                    {{--                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>--}}
+                    {{--                        {{ __('Dashboard') }}--}}
+                    {{--                    </x-nav-link>--}}
 
                     @role('admin')
-                        <x-nav-link :href="route('tests.index')" :active="request()->routeIs('tests.*')" wire:navigate>
-                            {{ __('Управління тестами') }}
-                        </x-nav-link>
+                    <x-nav-link :href="route('tests.index')" :active="request()->routeIs('tests.*')" wire:navigate>
+                        {{ __('Управління тестами') }}
+                    </x-nav-link>
 
-                        <x-nav-link :href="route('results.index')" :active="request()->routeIs('results.*')" wire:navigate>
-                            {{ __('Результати') }}
-                        </x-nav-link>
+                    <x-nav-link :href="route('results.index')" :active="request()->routeIs('results.*')" wire:navigate>
+                        {{ __('Результати') }}
+                    </x-nav-link>
 
-                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate>
-                            {{ __('Користувачі') }}
-                        </x-nav-link>
+                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate>
+                        {{ __('Користувачі') }}
+                    </x-nav-link>
+                    @endrole
+
+                    @role('student')
+                    <x-nav-link :href="route('user.tests')"
+                                :active="request()->routeIs('user.tests') || request()->routeIs('user.test.take')"
+                                wire:navigate>
+                        {{ __('Мої тести') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('user.results')"
+                                :active="request()->routeIs('user.results') || request()->routeIs('user.result.view')"
+                                wire:navigate>
+                        {{ __('Мої результати') }}
+                    </x-nav-link>
                     @endrole
                 </div>
             </div>
@@ -86,7 +100,8 @@ new class extends Component {
                 <button wire:click="logout"
                         class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
                     {{ __('Вийти') }}
                 </button>
@@ -111,22 +126,37 @@ new class extends Component {
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
+            {{--            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>--}}
+            {{--                {{ __('Dashboard') }}--}}
+            {{--            </x-responsive-nav-link>--}}
 
             @role('admin')
-                <x-responsive-nav-link :href="route('tests.index')" :active="request()->routeIs('tests.*')" wire:navigate>
-                    {{ __('Управління тестами') }}
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('tests.index')" :active="request()->routeIs('tests.*')" wire:navigate>
+                {{ __('Управління тестами') }}
+            </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('results.index')" :active="request()->routeIs('results.*')" wire:navigate>
-                    {{ __('Результати') }}
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('results.index')" :active="request()->routeIs('results.*')"
+                                   wire:navigate>
+                {{ __('Результати') }}
+            </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate>
-                    {{ __('Користувачі') }}
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate>
+                {{ __('Користувачі') }}
+            </x-responsive-nav-link>
+            @endrole
+
+            @role('student')
+            <x-responsive-nav-link :href="route('user.tests')"
+                                   :active="request()->routeIs('user.tests') || request()->routeIs('user.test.take')"
+                                   wire:navigate>
+                {{ __('Мої тести') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('user.results')"
+                                   :active="request()->routeIs('user.results') || request()->routeIs('user.result.view')"
+                                   wire:navigate>
+                {{ __('Мої результати') }}
+            </x-responsive-nav-link>
             @endrole
         </div>
 
@@ -150,7 +180,8 @@ new class extends Component {
                     <button wire:click="logout"
                             class="w-full inline-flex items-center justify-center px-4 py-3 bg-red-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
                         {{ __('Вийти з облікового запису') }}
                     </button>

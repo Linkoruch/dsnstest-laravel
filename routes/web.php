@@ -1,13 +1,32 @@
 <?php
 
+use App\Livewire\UserTests\{
+    AvailableTests,
+    MyResults,
+    TakeTest,
+    ViewMyResult
+};
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::view('dashboard', 'dashboard')
-        ->name('dashboard');
 
+// Маршрути для користувачів (проходження тестів)
+Route::middleware(['auth'])->prefix('my')->name('user.')->group(function () {
+    Route::get('/tests', AvailableTests::class)->name('tests');
+    Route::get('/test/{test}', TakeTest::class)->name('test.take');
+    Route::get('/results', MyResults::class)->name('results');
+    Route::get('/result/{testResult}', ViewMyResult::class)->name('result.view');
+});
+
+Route::view('profile', 'profile')
+    ->middleware(['auth'])
+    ->name('profile');
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+//    Route::view('dashboard', 'dashboard')
+//        ->name('dashboard');
+//
     // Маршрути для тестів (тільки для адміністраторів)
     Route::prefix('tests')->name('tests.')->group(function () {
         Route::get('/', \App\Livewire\Tests\TestList::class)->name('index');
@@ -70,17 +89,5 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
  *  - Для видалення тесту треба клікнути на значок корзини біля тесту (зробити це через модальне вікно підтвердження)
  *
  */
-
-// Маршрути для користувачів (проходження тестів)
-Route::middleware(['auth'])->prefix('my')->name('user.')->group(function () {
-    Route::get('/tests', \App\Livewire\UserTests\AvailableTests::class)->name('tests');
-    Route::get('/test/{test}', \App\Livewire\UserTests\TakeTest::class)->name('test.take');
-    Route::get('/results', \App\Livewire\UserTests\MyResults::class)->name('results');
-    Route::get('/result/{testResult}', \App\Livewire\UserTests\ViewMyResult::class)->name('result.view');
-});
-
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
 
 require __DIR__ . '/auth.php';

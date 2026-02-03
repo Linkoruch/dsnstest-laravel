@@ -1,9 +1,20 @@
 <div>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="mb-6">
-                <h2 class="text-3xl font-bold text-gray-800">Мої результати</h2>
-                <p class="text-gray-600 mt-2">Історія проходження тестів</p>
+            <!-- Заголовок з навігацією -->
+            <div class="mb-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800">Мої результати</h2>
+                    <p class="text-gray-600 mt-2">Історія проходження тестів</p>
+                </div>
+                <a href="{{ route('user.tests') }}"
+                   wire:navigate
+                   class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Перейти до тестів
+                </a>
             </div>
 
             <!-- Пошук -->
@@ -91,6 +102,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <a href="{{ route('user.result.view', $result->id) }}"
+                                           wire:navigate
                                            class="text-blue-600 hover:text-blue-900"
                                            title="Переглянути деталі">
                                             <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,6 +121,7 @@
                                         </svg>
                                         <p class="text-gray-500 text-lg mb-4">Ви ще не пройшли жодного тесту</p>
                                         <a href="{{ route('user.tests') }}"
+                                           wire:navigate
                                            class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition">
                                             Перейти до тестів
                                         </a>

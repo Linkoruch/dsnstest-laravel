@@ -5,6 +5,7 @@ namespace App\Livewire\TestResults;
 use App\Models\TestResult;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Storage;
 
 class TestResultList extends Component
 {
@@ -49,8 +50,8 @@ class TestResultList extends Component
         $testResult = TestResult::findOrFail($this->deleteId);
 
         // Видаляємо JSON файл результатів
-        if ($testResult->result_file_path && file_exists(storage_path('app/' . $testResult->result_file_path))) {
-            unlink(storage_path('app/' . $testResult->result_file_path));
+        if ($testResult->result_file_path && Storage::exists($testResult->result_file_path)) {
+            Storage::delete($testResult->result_file_path);
         }
 
         $testResult->delete();

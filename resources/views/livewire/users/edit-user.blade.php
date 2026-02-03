@@ -44,7 +44,7 @@
                                 Email <span class="text-red-500">*</span>
                             </label>
                             <input
-                                type="email"
+                                type="text"
                                 id="email"
                                 wire:model="email"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('email') border-red-500 @enderror"
@@ -62,7 +62,7 @@
                             <input
                                 type="password"
                                 id="password"
-                                wire:model="password"
+                                wire:model.live="password"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('password') border-red-500 @enderror"
                                 placeholder="Мінімум 8 символів">
                             @error('password')

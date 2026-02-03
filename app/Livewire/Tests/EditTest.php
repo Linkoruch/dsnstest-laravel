@@ -5,6 +5,7 @@ namespace App\Livewire\Tests;
 use App\Models\Test;
 use App\Models\User;
 use Livewire\Component;
+use Illuminate\Support\Facades\Storage;
 
 class EditTest extends Component
 {
@@ -132,19 +133,13 @@ class EditTest extends Component
         }
 
         // Видаляємо старий JSON файл
-        if ($this->test->questions_file_path && file_exists(storage_path('app/' . $this->test->questions_file_path))) {
-            unlink(storage_path('app/' . $this->test->questions_file_path));
+        if ($this->test->questions_file_path && Storage::exists($this->test->questions_file_path)) {
+            Storage::delete($this->test->questions_file_path);
         }
 
         // Створюємо новий JSON файл
         $fileName = 'tests/questions_' . time() . '_' . uniqid() . '.json';
-        $filePath = storage_path('app/' . $fileName);
-
-        if (!is_dir(dirname($filePath))) {
-            mkdir(dirname($filePath), 0755, true);
-        }
-
-        file_put_contents($filePath, json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        Storage::put($fileName, json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         // Визначаємо список користувачів
         $assignedUsers = $this->assignToAll ? ['all'] : $this->selectedUsers;

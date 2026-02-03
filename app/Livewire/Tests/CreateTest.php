@@ -5,6 +5,7 @@ namespace App\Livewire\Tests;
 use App\Models\Test;
 use App\Models\User;
 use Livewire\Component;
+use Illuminate\Support\Facades\Storage;
 
 class CreateTest extends Component
 {
@@ -101,14 +102,7 @@ class CreateTest extends Component
 
         // Створюємо JSON файл
         $fileName = 'tests/questions_' . time() . '_' . uniqid() . '.json';
-        $filePath = storage_path('app/' . $fileName);
-
-        // Переконуємось що директорія існує
-        if (!is_dir(dirname($filePath))) {
-            mkdir(dirname($filePath), 0755, true);
-        }
-
-        file_put_contents($filePath, json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        Storage::put($fileName, json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         // Визначаємо список користувачів
         $assignedUsers = $this->assignToAll ? ['all'] : $this->selectedUsers;

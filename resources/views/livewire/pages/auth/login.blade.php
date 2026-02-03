@@ -16,11 +16,18 @@ new #[Layout('layouts.guest')] class extends Component
     {
         $this->validate();
 
+
         $this->form->authenticate();
 
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $user = auth()->user();
+
+        if ($user->hasRole(['admin'])){
+            $this->redirectIntended(default: route('tests.index', absolute: false), navigate: true);
+        }else{
+            $this->redirectIntended(default: route('user.tests', absolute: false), navigate: true);
+        }
     }
 }; ?>
 

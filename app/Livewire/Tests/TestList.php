@@ -5,6 +5,7 @@ namespace App\Livewire\Tests;
 use App\Models\Test;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Storage;
 
 class TestList extends Component
 {
@@ -34,8 +35,8 @@ class TestList extends Component
 
             if ($test) {
                 // Видаляємо файл з питаннями
-                if ($test->questions_file_path && file_exists(storage_path('app/' . $test->questions_file_path))) {
-                    unlink(storage_path('app/' . $test->questions_file_path));
+                if ($test->questions_file_path && Storage::exists($test->questions_file_path)) {
+                    Storage::delete($test->questions_file_path);
                 }
 
                 $test->delete();
