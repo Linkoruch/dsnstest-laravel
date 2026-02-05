@@ -53,7 +53,7 @@ new class extends Component {
                     </x-nav-link>
                     @endrole
 
-                    @role('student')
+                    @role('user')
                     <x-nav-link :href="route('user.tests')"
                                 :active="request()->routeIs('user.tests') || request()->routeIs('user.test.take')"
                                 wire:navigate>
@@ -145,7 +145,7 @@ new class extends Component {
             </x-responsive-nav-link>
             @endrole
 
-            @role('student')
+            @role('user')
             <x-responsive-nav-link :href="route('user.tests')"
                                    :active="request()->routeIs('user.tests') || request()->routeIs('user.test.take')"
                                    wire:navigate>

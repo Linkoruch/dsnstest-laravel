@@ -30,9 +30,18 @@ class AvailableTests extends Component
                 // Тести без призначень (доступні всім)
                 $query->whereNull('assigned_users')
                     // Або тести з 'all' у призначеннях
-                    ->orWhereJsonContains('assigned_users', 'all')
+                    ->orWhere(function ($q) {
+                        $q->whereNotNull('assigned_users')
+                          ->where('assigned_users', 'like', '%"all"%');
+                    })
                     // Або тести, де є ID поточного користувача
-                    ->orWhereJsonContains('assigned_users', (string)$userId);
+                    ->orWhere(function ($q) use ($userId) {
+                        $q->whereNotNull('assigned_users')
+                          ->where(function ($q2) use ($userId) {
+                              $q2->where('assigned_users', 'like', '%"' . $userId . '"%')
+                                 ->orWhere('assigned_users', 'like', '%' . $userId . '%');
+                          });
+                    });
             })
             ->withCount('testResults')
             ->orderBy('created_at', 'desc')
