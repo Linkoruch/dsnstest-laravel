@@ -14,28 +14,18 @@ class EditTest extends Component
     public $description;
     public $questions = [];
     public $successMessage = '';
-    public $assignToAll = false;
-    public $selectedUsers = [];
-    public $availableUsers = [];
+    public $selectedRiskLevels = [];
+    public $attempts_limit = null;
 
     public function mount(Test $test)
     {
         $this->test = $test;
         $this->name = $test->name;
         $this->description = $test->description;
+        $this->attempts_limit = $test->attempts_limit;
 
-        // Завантажуємо список користувачів з роллю user
-        $this->availableUsers = User::role('user')->get(['id', 'name', 'email'])->toArray();
-
-        // Завантажуємо призначених користувачів
-        $assignedUsers = $test->getAssignedUserIds();
-        if (empty($assignedUsers) || in_array('all', $assignedUsers)) {
-            $this->assignToAll = true;
-            $this->selectedUsers = [];
-        } else {
-            $this->assignToAll = false;
-            $this->selectedUsers = array_map('intval', $assignedUsers); // Перетворюємо на int
-        }
+        // Завантажуємо рівні ризику
+        $this->selectedRiskLevels = $test->getRiskLevels();
 
         // Завантажуємо питання з JSON файлу
         $existingQuestions = $test->getQuestions();
@@ -63,6 +53,7 @@ class EditTest extends Component
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'attempts_limit' => 'nullable|integer|min:1',
             'questions' => 'required|array|min:1',
             'questions.*.question_text' => 'required|string',
             'questions.*.option_a' => 'required|string',
@@ -76,6 +67,8 @@ class EditTest extends Component
     protected $messages = [
         'name.required' => 'Назва тесту є обов\'язковою',
         'name.max' => 'Назва тесту не може перевищувати 255 символів',
+        'attempts_limit.integer' => 'Кількість спроб має бути числом',
+        'attempts_limit.min' => 'Кількість спроб має бути не менше 1',
         'questions.required' => 'Додайте хоча б одне питання',
         'questions.min' => 'Додайте хоча б одне питання',
         'questions.*.question_text.required' => 'Текст питання є обов\'язковим',
@@ -141,15 +134,13 @@ class EditTest extends Component
         $fileName = 'tests/questions_' . time() . '_' . uniqid() . '.json';
         Storage::put($fileName, json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-        // Визначаємо список користувачів
-        $assignedUsers = $this->assignToAll ? ['all'] : $this->selectedUsers;
-
         // Оновлюємо тест
         $this->test->update([
             'name' => $this->name,
             'description' => $this->description,
             'questions_file_path' => $fileName,
-            'assigned_users' => $assignedUsers,
+            'risk_levels' => empty($this->selectedRiskLevels) ? null : $this->selectedRiskLevels,
+            'attempts_limit' => $this->attempts_limit,
         ]);
 
         // Показуємо повідомлення про успіх (залишаємось на сторінці)

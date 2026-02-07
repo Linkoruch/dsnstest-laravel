@@ -40,6 +40,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/{testResult}', \App\Livewire\TestResults\ViewTestResult::class)->name('view');
     });
 
+    // Маршрут для управління спробами тестів
+    Route::get('/tests/{test}/manage-attempts', \App\Livewire\TestResults\ManageAttempts::class)->name('tests.manage-attempts');
+
     // Маршрути для користувачів (тільки для адміністраторів)
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', \App\Livewire\Users\UserList::class)->name('index');

@@ -11,6 +11,10 @@ class Test extends Model
 {
     use HasFactory;
 
+    // Константи для рівнів ризику
+    const RISK_HIGH = 'high';
+    const RISK_LOW = 'low';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -20,7 +24,8 @@ class Test extends Model
         'name',
         'description',
         'questions_file_path',
-        'assigned_users',
+        'risk_levels',
+        'attempts_limit',
     ];
 
     /**
@@ -33,7 +38,8 @@ class Test extends Model
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            'assigned_users' => 'array',
+            'risk_levels' => 'array',
+            'attempts_limit' => 'integer',
         ];
     }
 
@@ -63,29 +69,74 @@ class Test extends Model
      */
     public function isAvailableForUser($userId): bool
     {
-        // Якщо assigned_usersNull або порожній - тест доступний всім
-        if (empty($this->assigned_users)) {
+        // Отримуємо користувача
+        $user = User::find($userId);
+        if (!$user) {
+            return false;
+        }
+
+        // Якщо risk_levels порожній або null - тест доступний всім
+        if (empty($this->risk_levels)) {
             return true;
         }
 
-        // Перевіряємо чи є 'all' в масиві (доступний всім)
-        if (in_array('all', $this->assigned_users)) {
-            return true;
-        }
-
-        // Перевіряємо чи є ID користувача в списку
-        return in_array($userId, $this->assigned_users);
+        // Перевіряємо чи рівень ризику користувача є в списку доступних рівнів
+        return in_array($user->risk_level, $this->risk_levels);
     }
 
     /**
-     * Отримати список ID користувачів, яким доступний тест
+     * Отримати список рівнів ризику для тесту
      */
-    public function getAssignedUserIds(): array
+    public function getRiskLevels(): array
     {
-        if (empty($this->assigned_users)) {
+        if (empty($this->risk_levels)) {
             return [];
         }
 
-        return $this->assigned_users;
+        return $this->risk_levels;
+    }
+
+    /**
+     * Отримати або створити запис про спроби користувача
+     */
+    public function getUserAttempt($userId): UserTestAttempt
+    {
+        $attempt = UserTestAttempt::firstOrCreate(
+            [
+                'user_id' => $userId,
+                'test_id' => $this->id,
+            ],
+            [
+                'attempts_used' => 0,
+                'bonus_attempts' => 0,
+            ]
+        );
+
+        // Завантажуємо зв'язок test, якщо він не завантажений
+        if (!$attempt->relationLoaded('test')) {
+            $attempt->setRelation('test', $this);
+        }
+
+        return $attempt;
+    }
+
+    /**
+     * Перевірити чи може користувач пройти тест (враховуючи спроби)
+     */
+    public function canUserTakeTest($userId): bool
+    {
+        // Перевірка доступу за рівнем ризику
+        if (!$this->isAvailableForUser($userId)) {
+            return false;
+        }
+
+        // Якщо ліміт не встановлено - можна проходити
+        if ($this->attempts_limit === null) {
+            return true;
+        }
+
+        // Перевіряємо залишок спроб
+        $attempt = $this->getUserAttempt($userId);
+        return $attempt->hasAttemptsAvailable();
     }
 }

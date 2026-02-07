@@ -69,12 +69,39 @@
                                 </div>
                             </div>
 
+                            <!-- Інформація про спроби -->
+                            @php
+                                $attempt = $test->getUserAttempt(auth()->id());
+                                $remaining = $attempt->getRemainingAttempts();
+                                $canTake = $test->canUserTakeTest(auth()->id());
+                            @endphp
+
+                            @if($test->attempts_limit !== null)
+                                <div class="mb-4 p-3 rounded-lg {{ $remaining > 0 ? 'bg-blue-50 border border-blue-200' : 'bg-red-50 border border-red-200' }}">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="font-medium {{ $remaining > 0 ? 'text-blue-800' : 'text-red-800' }}">
+                                            Залишилось спроб:
+                                        </span>
+                                        <span class="font-bold {{ $remaining > 0 ? 'text-blue-900' : 'text-red-900' }}">
+                                            {{ $remaining }} / {{ $attempt->getTotalAvailableAttempts() }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
+
                             <!-- Кнопка -->
-                            <a href="{{ route('user.test.take', $test->id) }}"
-                               wire:navigate
-                               class="block w-full text-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200">
-                                Розпочати тест
-                            </a>
+                            @if($canTake)
+                                <a href="{{ route('user.test.take', $test->id) }}"
+                                   wire:navigate
+                                   class="block w-full text-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200">
+                                    Розпочати тест
+                                </a>
+                            @else
+                                <button disabled
+                                        class="block w-full text-center px-4 py-3 bg-gray-400 text-white font-semibold rounded-lg cursor-not-allowed opacity-60">
+                                    Спроби вичерпано
+                                </button>
+                            @endif
                         </div>
                     </div>
                 @empty

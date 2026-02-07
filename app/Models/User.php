@@ -16,6 +16,10 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    // Константи для рівнів ризику
+    const RISK_HIGH = 'high';
+    const RISK_LOW = 'low';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -25,6 +29,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'risk_level',
     ];
 
     /**
@@ -51,10 +56,10 @@ class User extends Authenticatable
     }
 
     /**
-     * Зв'язок з результатами тестів
+     * Зв'язок зі спробами проходження тестів
      */
-    public function testResults(): HasMany
+    public function testAttempts(): HasMany
     {
-        return $this->hasMany(TestResult::class);
+        return $this->hasMany(UserTestAttempt::class);
     }
 }

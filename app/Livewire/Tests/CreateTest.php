@@ -13,14 +13,11 @@ class CreateTest extends Component
     public $description = '';
     public $questions = [];
     public $successMessage = '';
-    public $assignToAll = true; // За замовчуванням - всім
-    public $selectedUsers = [];
-    public $availableUsers = [];
+    public $selectedRiskLevels = []; // Масив обраних рівнів ризику
+    public $attempts_limit = null; // Кількість спроб (null = необмежено)
 
     public function mount()
     {
-        // Завантажуємо список користувачів з роллю user
-        $this->availableUsers = User::role('user')->get(['id', 'name', 'email'])->toArray();
 
         // Додаємо одне порожнє питання для початку
         $this->addQuestion(false); // false = не прокручувати при mount
@@ -31,6 +28,7 @@ class CreateTest extends Component
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'attempts_limit' => 'nullable|integer|min:1',
             'questions' => 'required|array|min:1',
             'questions.*.question_text' => 'required|string',
             'questions.*.option_a' => 'required|string',
@@ -44,6 +42,8 @@ class CreateTest extends Component
     protected $messages = [
         'name.required' => 'Назва тесту є обов\'язковою',
         'name.max' => 'Назва тесту не може перевищувати 255 символів',
+        'attempts_limit.integer' => 'Кількість спроб має бути числом',
+        'attempts_limit.min' => 'Кількість спроб має бути не менше 1',
         'questions.required' => 'Додайте хоча б одне питання',
         'questions.min' => 'Додайте хоча б одне питання',
         'questions.*.question_text.required' => 'Текст питання є обов\'язковим',
@@ -104,23 +104,20 @@ class CreateTest extends Component
         $fileName = 'tests/questions_' . time() . '_' . uniqid() . '.json';
         Storage::put($fileName, json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-        // Визначаємо список користувачів
-        $assignedUsers = $this->assignToAll ? ['all'] : $this->selectedUsers;
-
         // Створюємо тест
         Test::create([
             'name' => $this->name,
             'description' => $this->description,
             'questions_file_path' => $fileName,
-            'assigned_users' => $assignedUsers,
+            'risk_levels' => empty($this->selectedRiskLevels) ? null : $this->selectedRiskLevels,
+            'attempts_limit' => $this->attempts_limit,
         ]);
 
         // Показуємо повідомлення про успіх (залишаємось на сторінці)
         $this->successMessage = 'Тест успішно створено!';
 
         // Скидаємо форму для створення нового тесту
-        $this->reset(['name', 'description', 'questions', 'selectedUsers']);
-        $this->assignToAll = true;
+        $this->reset(['name', 'description', 'questions', 'selectedRiskLevels', 'attempts_limit']);
         $this->addQuestion(false); // Додаємо одне порожнє питання
 
         // Dispatch події для можливого використання в JavaScript

@@ -55,58 +55,61 @@
                             @enderror
                         </div>
 
-                        <!-- Призначення користувачів -->
+                        <!-- Призначення за рівнем ризику -->
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-3">
-                                Доступ до тесту <span class="text-red-500">*</span>
+                                Доступ до тесту за рівнем ризику
                             </label>
 
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                                <div class="flex items-start">
-                                    <input
-                                        type="checkbox"
-                                        id="assignToAll"
-                                        wire:model.live="assignToAll"
-                                        class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                    <label for="assignToAll" class="ml-2 block text-sm text-gray-700">
-                                        <span class="font-semibold">Доступний для всіх користувачів</span>
-                                        <p class="text-gray-600 text-xs mt-1">Якщо відмічено, всі користувачі зможуть проходити цей тест</p>
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <p class="text-sm text-gray-700 mb-3 font-medium">Оберіть рівні ризику для доступу до тесту:</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            wire:model="selectedRiskLevels"
+                                            value="high"
+                                            class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                        <span class="ml-2 text-sm text-gray-700 font-medium">
+                                            Високий ризик
+                                        </span>
+                                    </label>
+                                    <label class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            wire:model="selectedRiskLevels"
+                                            value="low"
+                                            class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                        <span class="ml-2 text-sm text-gray-700 font-medium">
+                                            Низький ризик
+                                        </span>
                                     </label>
                                 </div>
+                                <p class="text-gray-600 text-xs mt-3">
+                                    Якщо жоден рівень не обрано, тест буде доступний для всіх користувачів
+                                </p>
                             </div>
+                        </div>
 
-                            @if(!$assignToAll)
-                                <div class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto">
-                                    <p class="text-sm text-gray-700 mb-3 font-medium">Оберіть користувачів:</p>
-                                    @if(count($availableUsers) > 0)
-                                        <div class="space-y-2">
-                                            @foreach($availableUsers as $user)
-                                                <label class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        wire:model="selectedUsers"
-                                                        value="{{ $user['id'] }}"
-                                                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                                    <span class="ml-2 text-sm text-gray-700">
-                                                        {{ $user['name'] }}
-                                                        <span class="text-gray-500">({{ $user['email'] }})</span>
-                                                    </span>
-                                                </label>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <p class="text-sm text-gray-500">Немає доступних користувачів</p>
-                                    @endif
-                                </div>
-                                @if(!$assignToAll && count($selectedUsers) === 0)
-                                    <p class="mt-2 text-sm text-amber-600">
-                                        <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                        </svg>
-                                        Оберіть хоча б одного користувача або виберіть "Доступний для всіх"
-                                    </p>
-                                @endif
-                            @endif
+                        <!-- Кількість спроб -->
+                        <div class="mb-6">
+                            <label for="attempts_limit" class="block text-sm font-medium text-gray-700 mb-2">
+                                Кількість спроб для проходження
+                            </label>
+                            <input
+                                type="number"
+                                id="attempts_limit"
+                                wire:model="attempts_limit"
+                                value="{{ $attempts_limit }}"
+                                min="1"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('attempts_limit') border-red-500 @else border-gray-300 @enderror"
+                                placeholder="Залиште порожнім для необмеженої кількості спроб">
+                            @error('attempts_limit')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-sm text-gray-500">
+                                💡 Якщо не вказати - користувачі зможуть проходити тест необмежену кількість разів
+                            </p>
                         </div>
 
                         <!-- Питання -->

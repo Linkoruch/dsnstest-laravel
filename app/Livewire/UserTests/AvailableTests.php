@@ -19,28 +19,24 @@ class AvailableTests extends Component
 
     public function render()
     {
-        $userId = auth()->id();
+        $user = auth()->user();
+        $userId = $user->id;
+        $userRiskLevel = $user->risk_level;
 
         $tests = Test::query()
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
                       ->orWhere('description', 'like', '%' . $this->search . '%');
             })
-            ->where(function ($query) use ($userId) {
-                // Тести без призначень (доступні всім)
-                $query->whereNull('assigned_users')
-                    // Або тести з 'all' у призначеннях
-                    ->orWhere(function ($q) {
-                        $q->whereNotNull('assigned_users')
-                          ->where('assigned_users', 'like', '%"all"%');
-                    })
-                    // Або тести, де є ID поточного користувача
-                    ->orWhere(function ($q) use ($userId) {
-                        $q->whereNotNull('assigned_users')
-                          ->where(function ($q2) use ($userId) {
-                              $q2->where('assigned_users', 'like', '%"' . $userId . '"%')
-                                 ->orWhere('assigned_users', 'like', '%' . $userId . '%');
-                          });
+            ->where(function ($query) use ($userRiskLevel) {
+                // Тести без рівнів ризику (доступні всім)
+                $query->whereNull('risk_levels')
+                    // Або тести з рівнем ризику користувача
+                    ->orWhere(function ($q) use ($userRiskLevel) {
+                        if ($userRiskLevel) {
+                            $q->whereNotNull('risk_levels')
+                              ->where('risk_levels', 'like', '%"' . $userRiskLevel . '"%');
+                        }
                     });
             })
             ->withCount('testResults')

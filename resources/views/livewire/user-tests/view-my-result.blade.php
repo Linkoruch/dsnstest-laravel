@@ -8,7 +8,7 @@
                     <div class="mb-6 flex justify-between items-center">
                         <div>
                             <h2 class="text-2xl font-bold text-gray-800">Мій результат</h2>
-                            <p class="text-gray-600 mt-1">Детальний перегляд ваших відповідей</p>
+                            <p class="text-gray-600 mt-1">Загальна статистика проходження тесту</p>
                         </div>
                         <a href="{{ route('user.results') }}"
                            wire:navigate
@@ -51,78 +51,20 @@
                             </div>
                         </div>
 
-                        <!-- Детальні відповіді -->
-                        <div>
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Детальний розбір відповідей</h3>
-                            <div class="space-y-4">
-                                @if(isset($questions['questions']) && is_array($questions['questions']) && count($questions['questions']) > 0)
-                                    @foreach($results['answers'] as $answer)
-                                        @php
-                                            $question = collect($questions['questions'])->firstWhere('question_id', $answer['question_id']);
-                                        @endphp
-                                        @if($question)
-                                        <div class="border rounded-lg p-6
-                                            @if($answer['is_correct'])
-                                                bg-green-50 border-green-200
-                                            @else
-                                                bg-red-50 border-red-200
-                                            @endif">
-                                            <div class="flex items-start justify-between mb-3">
-                                                <h4 class="font-semibold text-gray-800 flex-1">
-                                                    <span class="text-blue-600">Питання {{ $answer['question_id'] }}:</span> {{ $question['question_text'] }}
-                                                </h4>
-                                                @if($answer['is_correct'])
-                                                    <span class="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ml-4">
-                                                        ✓ Правильно
-                                                    </span>
-                                                @else
-                                                    <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ml-4">
-                                                        ✗ Неправильно
-                                                    </span>
-                                                @endif
-                                            </div>
-
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                                                @foreach($question['options'] as $key => $option)
-                                                    <div class="p-4 rounded-lg transition
-                                                        @if($key === $question['correct_answer'])
-                                                            bg-green-100 border-2 border-green-500
-                                                        @elseif($key === $answer['given_answer'] && !$answer['is_correct'])
-                                                            bg-red-100 border-2 border-red-500
-                                                        @else
-                                                            bg-white border border-gray-200
-                                                        @endif">
-                                                        <div class="flex items-start">
-                                                            <span class="font-bold text-lg mr-3 text-gray-700">{{ $key }}.</span>
-                                                            <div class="flex-1">
-                                                                <span class="text-gray-800">{{ $option }}</span>
-                                                                @if($key === $question['correct_answer'])
-                                                                    <div class="text-xs text-green-700 font-semibold mt-1">
-                                                                        ✓ Правильна відповідь
-                                                                    </div>
-                                                                @endif
-                                                                @if($key === $answer['given_answer'] && !$answer['is_correct'])
-                                                                    <div class="text-xs text-red-700 font-semibold mt-1">
-                                                                        ✗ Ваша відповідь
-                                                                    </div>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
-                                @endforeach
-                                @else
-                                    <div class="text-center py-8 bg-yellow-50 rounded-lg border border-yellow-200">
-                                        <svg class="w-12 h-12 mx-auto text-yellow-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                        </svg>
-                                        <p class="text-yellow-700 font-medium">Дані питань недоступні</p>
-                                        <p class="text-yellow-600 text-sm mt-1">Можливо, файл з питаннями було видалено або пошкоджено</p>
-                                    </div>
-                                @endif
+                        <!-- Інформаційне повідомлення -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 text-blue-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-2">Інформація про результати</h4>
+                                    <p class="text-gray-600 text-sm">
+                                        Ви успішно пройшли тест "{{ $testResult->test->name }}".
+                                        Детальний розбір відповідей доступний тільки адміністратору.
+                                        Ви можете переглянути вашу загальну статистику вище.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     @else

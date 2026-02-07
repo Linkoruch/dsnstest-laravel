@@ -18,6 +18,13 @@ class TakeTest extends Component
     public function mount(Test $test)
     {
         $this->test = $test;
+
+        // Перевіряємо чи може користувач пройти тест
+        if (!$test->canUserTakeTest(auth()->id())) {
+            session()->flash('error', 'У вас немає доступу до цього тесту або вичерпано кількість спроб.');
+            return redirect()->route('user.tests.available');
+        }
+
         $questionsData = $test->getQuestions();
 
         if ($questionsData && isset($questionsData['questions'])) {
@@ -105,6 +112,10 @@ class TakeTest extends Component
             'result_file_path' => $fileName,
             'completed_at' => now()
         ]);
+
+        // Використовуємо одну спробу
+        $attempt = $this->test->getUserAttempt(auth()->id());
+        $attempt->useAttempt();
 
         $this->isCompleted = true;
     }

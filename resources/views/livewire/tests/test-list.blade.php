@@ -74,6 +74,15 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div class="flex justify-end gap-2">
+                                                    <!-- Кнопка управління спробами -->
+                                                    <a href="{{ route('tests.manage-attempts', $test) }}"
+                                                       class="text-purple-600 hover:text-purple-900 transition duration-150"
+                                                       title="Управління спробами">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                        </svg>
+                                                    </a>
+
                                                     <!-- Кнопка редагування -->
                                                     <a href="{{ route('tests.edit', $test) }}"
                                                        class="text-blue-600 hover:text-blue-900 transition duration-150"

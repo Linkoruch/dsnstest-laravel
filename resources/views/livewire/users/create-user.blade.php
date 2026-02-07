@@ -103,6 +103,24 @@
                             @enderror
                         </div>
 
+                        <!-- Рівень ризику -->
+                        <div class="mb-6">
+                            <label for="risk_level" class="block text-sm font-medium text-gray-700 mb-2">
+                                Рівень ризику
+                            </label>
+                            <select
+                                id="risk_level"
+                                wire:model="risk_level"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('risk_level') border-red-500 @enderror">
+                                <option value="">Не вказано</option>
+                                <option value="high">Високий ризик</option>
+                                <option value="low">Низький ризик</option>
+                            </select>
+                            @error('risk_level')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <!-- Кнопки -->
                         <div class="flex justify-end gap-3 mt-6">
                             <a href="{{ route('users.index') }}"

@@ -112,6 +112,9 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Роль
                                     </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Рівень ризику
+                                    </th>
                                     <th wire:click="sortBy('created_at')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                                         <div class="flex items-center">
                                             Дата реєстрації
@@ -154,6 +157,21 @@
                                                 </span>
                                             @endif
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($user->risk_level === 'high')
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                    Високий ризик
+                                                </span>
+                                            @elseif($user->risk_level === 'low')
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                    Низький ризик
+                                                </span>
+                                            @else
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                    Не вказано
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $user->created_at->format('d.m.Y H:i') }}
                                         </td>
@@ -179,7 +197,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
                                             Користувачів не знайдено
                                         </td>
                                     </tr>

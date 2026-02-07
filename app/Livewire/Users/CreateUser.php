@@ -14,6 +14,7 @@ class CreateUser extends Component
     public $password = '';
     public $password_confirmation = '';
     public $role = 'user';
+    public $risk_level = 'low'; // За замовчуванням низький ризик
     public $successMessage = '';
 
     protected function rules()
@@ -23,6 +24,7 @@ class CreateUser extends Component
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:admin,user',
+            'risk_level' => 'nullable|in:high,low',
         ];
     }
 
@@ -36,6 +38,7 @@ class CreateUser extends Component
         'password.min' => 'Пароль має містити щонайменше 8 символів',
         'password.confirmed' => 'Паролі не співпадають',
         'role.required' => 'Оберіть роль користувача',
+        'risk_level.in' => 'Оберіть коректний рівень ризику',
     ];
 
     public function save()
@@ -46,6 +49,7 @@ class CreateUser extends Component
             'name' => $this->name,
             'email' => $this->email,
             'password' => Hash::make($this->password),
+            'risk_level' => $this->risk_level,
         ]);
 
         // Призначаємо роль
@@ -54,8 +58,9 @@ class CreateUser extends Component
         $this->successMessage = 'Користувача успішно створено!';
 
         // Скидаємо форму
-        $this->reset(['name', 'email', 'password', 'password_confirmation', 'role']);
+        $this->reset(['name', 'email', 'password', 'password_confirmation', 'role', 'risk_level']);
         $this->role = 'user'; // Встановлюємо значення за замовчуванням
+        $this->risk_level = 'low'; // Встановлюємо значення за замовчуванням
     }
 
     public function render()
