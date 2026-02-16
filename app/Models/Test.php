@@ -26,6 +26,8 @@ class Test extends Model
         'questions_file_path',
         'risk_levels',
         'attempts_limit',
+        'duration_minutes',
+        'questions_count',
     ];
 
     /**
@@ -40,6 +42,8 @@ class Test extends Model
             'updated_at' => 'datetime',
             'risk_levels' => 'array',
             'attempts_limit' => 'integer',
+            'duration_minutes' => 'integer',
+            'questions_count' => 'integer',
         ];
     }
 
@@ -54,6 +58,44 @@ class Test extends Model
 
         $content = Storage::get($this->questions_file_path);
         return json_decode($content, true);
+    }
+
+    /**
+     * Отримати випадкові питання для проходження тесту
+     * Якщо questions_count встановлено - повертає вказану кількість випадкових питань
+     * Якщо NULL - повертає всі питання
+     */
+    public function getRandomQuestions(): ?array
+    {
+        $allQuestions = $this->getQuestions();
+
+        if (!$allQuestions || !isset($allQuestions['questions'])) {
+            return null;
+        }
+
+        $questions = $allQuestions['questions'];
+
+        // Якщо questions_count не встановлено або більше/дорівнює загальній кількості - повертаємо всі
+        if (!$this->questions_count || $this->questions_count >= count($questions)) {
+            return $allQuestions;
+        }
+
+        // Вибираємо випадкові питання
+        $randomKeys = array_rand($questions, $this->questions_count);
+
+        // array_rand повертає одне значення якщо count = 1, інакше масив
+        if (!is_array($randomKeys)) {
+            $randomKeys = [$randomKeys];
+        }
+
+        $randomQuestions = [];
+        foreach ($randomKeys as $key) {
+            $randomQuestions[] = $questions[$key];
+        }
+
+        return [
+            'questions' => $randomQuestions
+        ];
     }
 
     /**

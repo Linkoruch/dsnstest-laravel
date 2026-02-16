@@ -86,11 +86,14 @@ class UserTestAttempt extends Model
     }
 
     /**
-     * Скинути спроби (обнулити)
+     * Скинути спроби (обнулити до базового ліміту)
      */
     public function resetAttempts(): void
     {
-        $this->update(['attempts_used' => 0]);
+        $this->update([
+            'attempts_used' => 0,
+            'bonus_attempts' => 0,
+        ]);
     }
 
     /**

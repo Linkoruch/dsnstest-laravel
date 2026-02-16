@@ -112,6 +112,48 @@
                             </p>
                         </div>
 
+                        <!-- Тривалість тесту -->
+                        <div class="mb-6">
+                            <label for="duration_minutes" class="block text-sm font-medium text-gray-700 mb-2">
+                                Тривалість тесту (хвилин)
+                            </label>
+                            <input
+                                type="number"
+                                id="duration_minutes"
+                                wire:model="duration_minutes"
+                                value="{{ $duration_minutes }}"
+                                min="1"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('duration_minutes') border-red-500 @else border-gray-300 @enderror"
+                                placeholder="Залиште порожнім для необмеженого часу">
+                            @error('duration_minutes')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-sm text-gray-500">
+                                ⏱️ Якщо не вказати - тест буде без обмеження часу. При закінченні часу тест завершується автоматично
+                            </p>
+                        </div>
+
+                        <!-- Кількість питань для показу -->
+                        <div class="mb-6">
+                            <label for="questions_count" class="block text-sm font-medium text-gray-700 mb-2">
+                                Кількість питань для показу користувачу
+                            </label>
+                            <input
+                                type="number"
+                                id="questions_count"
+                                wire:model="questions_count"
+                                value="{{ $questions_count }}"
+                                min="1"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('questions_count') border-red-500 @else border-gray-300 @enderror"
+                                placeholder="Залиште порожнім щоб показувати всі питання">
+                            @error('questions_count')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-sm text-gray-500">
+                                🎲 Система випадково вибере вказану кількість питань із загального банку питань. Якщо не вказати - показуватимуться всі питання
+                            </p>
+                        </div>
+
                         <!-- Питання -->
                         <div class="mb-6">
                             <div class="mb-4">

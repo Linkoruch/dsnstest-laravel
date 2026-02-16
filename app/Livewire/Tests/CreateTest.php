@@ -15,6 +15,8 @@ class CreateTest extends Component
     public $successMessage = '';
     public $selectedRiskLevels = []; // Масив обраних рівнів ризику
     public $attempts_limit = null; // Кількість спроб (null = необмежено)
+    public $duration_minutes = null; // Тривалість тесту в хвилинах (null = без обмеження часу)
+    public $questions_count = null; // Кількість питань для показу (null = всі питання)
 
     public function mount()
     {
@@ -29,6 +31,8 @@ class CreateTest extends Component
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'attempts_limit' => 'nullable|integer|min:1',
+            'duration_minutes' => 'nullable|integer|min:1',
+            'questions_count' => 'nullable|integer|min:1',
             'questions' => 'required|array|min:1',
             'questions.*.question_text' => 'required|string',
             'questions.*.option_a' => 'required|string',
@@ -44,6 +48,10 @@ class CreateTest extends Component
         'name.max' => 'Назва тесту не може перевищувати 255 символів',
         'attempts_limit.integer' => 'Кількість спроб має бути числом',
         'attempts_limit.min' => 'Кількість спроб має бути не менше 1',
+        'duration_minutes.integer' => 'Тривалість має бути числом',
+        'duration_minutes.min' => 'Тривалість має бути не менше 1 хвилини',
+        'questions_count.integer' => 'Кількість питань має бути числом',
+        'questions_count.min' => 'Кількість питань має бути не менше 1',
         'questions.required' => 'Додайте хоча б одне питання',
         'questions.min' => 'Додайте хоча б одне питання',
         'questions.*.question_text.required' => 'Текст питання є обов\'язковим',
@@ -111,13 +119,15 @@ class CreateTest extends Component
             'questions_file_path' => $fileName,
             'risk_levels' => empty($this->selectedRiskLevels) ? null : $this->selectedRiskLevels,
             'attempts_limit' => $this->attempts_limit,
+            'duration_minutes' => $this->duration_minutes,
+            'questions_count' => $this->questions_count,
         ]);
 
         // Показуємо повідомлення про успіх (залишаємось на сторінці)
         $this->successMessage = 'Тест успішно створено!';
 
         // Скидаємо форму для створення нового тесту
-        $this->reset(['name', 'description', 'questions', 'selectedRiskLevels', 'attempts_limit']);
+        $this->reset(['name', 'description', 'questions', 'selectedRiskLevels', 'attempts_limit', 'duration_minutes', 'questions_count']);
         $this->addQuestion(false); // Додаємо одне порожнє питання
 
         // Dispatch події для можливого використання в JavaScript

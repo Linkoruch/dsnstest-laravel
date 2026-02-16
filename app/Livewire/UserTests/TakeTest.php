@@ -14,6 +14,8 @@ class TakeTest extends Component
     public $answers = [];
     public $currentQuestionIndex = 0;
     public $isCompleted = false;
+    public $startTime; // Час початку тесту
+    public $timeRemaining; // Залишок часу в секундах
 
     public function mount(Test $test)
     {
@@ -25,7 +27,8 @@ class TakeTest extends Component
             return redirect()->route('user.tests.available');
         }
 
-        $questionsData = $test->getQuestions();
+        // Отримуємо випадкові питання згідно з налаштуваннями
+        $questionsData = $test->getRandomQuestions();
 
         if ($questionsData && isset($questionsData['questions'])) {
             $this->questions = $questionsData['questions'];
@@ -34,6 +37,12 @@ class TakeTest extends Component
             foreach ($this->questions as $question) {
                 $this->answers[$question['question_id']] = '';
             }
+        }
+
+        // Ініціалізуємо таймер, якщо є обмеження часу
+        if ($test->duration_minutes) {
+            $this->startTime = now();
+            $this->timeRemaining = $test->duration_minutes * 60; // Конвертуємо хвилини в секунди
         }
     }
 
@@ -76,13 +85,27 @@ class TakeTest extends Component
             return;
         }
 
+        $this->completeTest();
+    }
+
+    public function autoSubmitTest()
+    {
+        // Автоматичне завершення при закінченні часу
+        // Не вимагає відповіді на всі питання
+        $this->completeTest();
+    }
+
+    private function completeTest()
+    {
         // Підраховуємо правильні відповіді
         $correctAnswers = 0;
         $detailedAnswers = [];
 
         foreach ($this->questions as $question) {
-            $givenAnswer = $this->answers[$question['question_id']];
-            $isCorrect = $givenAnswer === $question['correct_answer'];
+            $givenAnswer = $this->answers[$question['question_id']] ?? '';
+
+            // Якщо відповідь порожня, вважаємо її неправильною
+            $isCorrect = !empty($givenAnswer) && $givenAnswer === $question['correct_answer'];
 
             if ($isCorrect) {
                 $correctAnswers++;
@@ -90,7 +113,7 @@ class TakeTest extends Component
 
             $detailedAnswers[] = [
                 'question_id' => $question['question_id'],
-                'given_answer' => $givenAnswer,
+                'given_answer' => $givenAnswer ?: null,
                 'is_correct' => $isCorrect
             ];
         }
@@ -106,7 +129,7 @@ class TakeTest extends Component
         Storage::put($fileName, json_encode($resultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         // Зберігаємо результат у базу даних
-        TestResult::create([
+        $testResult = TestResult::create([
             'user_id' => auth()->id(),
             'test_id' => $this->test->id,
             'result_file_path' => $fileName,
@@ -117,7 +140,8 @@ class TakeTest extends Component
         $attempt = $this->test->getUserAttempt(auth()->id());
         $attempt->useAttempt();
 
-        $this->isCompleted = true;
+        // Редиректимо на сторінку з результатами
+        return redirect()->route('user.result.view', $testResult);
     }
 
     public function render()

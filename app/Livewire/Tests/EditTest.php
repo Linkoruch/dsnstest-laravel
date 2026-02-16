@@ -16,6 +16,8 @@ class EditTest extends Component
     public $successMessage = '';
     public $selectedRiskLevels = [];
     public $attempts_limit = null;
+    public $duration_minutes = null;
+    public $questions_count = null;
 
     public function mount(Test $test)
     {
@@ -23,6 +25,8 @@ class EditTest extends Component
         $this->name = $test->name;
         $this->description = $test->description;
         $this->attempts_limit = $test->attempts_limit;
+        $this->duration_minutes = $test->duration_minutes;
+        $this->questions_count = $test->questions_count;
 
         // Завантажуємо рівні ризику
         $this->selectedRiskLevels = $test->getRiskLevels();
@@ -54,6 +58,8 @@ class EditTest extends Component
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'attempts_limit' => 'nullable|integer|min:1',
+            'duration_minutes' => 'nullable|integer|min:1',
+            'questions_count' => 'nullable|integer|min:1',
             'questions' => 'required|array|min:1',
             'questions.*.question_text' => 'required|string',
             'questions.*.option_a' => 'required|string',
@@ -69,6 +75,10 @@ class EditTest extends Component
         'name.max' => 'Назва тесту не може перевищувати 255 символів',
         'attempts_limit.integer' => 'Кількість спроб має бути числом',
         'attempts_limit.min' => 'Кількість спроб має бути не менше 1',
+        'duration_minutes.integer' => 'Тривалість має бути числом',
+        'duration_minutes.min' => 'Тривалість має бути не менше 1 хвилини',
+        'questions_count.integer' => 'Кількість питань має бути числом',
+        'questions_count.min' => 'Кількість питань має бути не менше 1',
         'questions.required' => 'Додайте хоча б одне питання',
         'questions.min' => 'Додайте хоча б одне питання',
         'questions.*.question_text.required' => 'Текст питання є обов\'язковим',
@@ -141,6 +151,8 @@ class EditTest extends Component
             'questions_file_path' => $fileName,
             'risk_levels' => empty($this->selectedRiskLevels) ? null : $this->selectedRiskLevels,
             'attempts_limit' => $this->attempts_limit,
+            'duration_minutes' => $this->duration_minutes,
+            'questions_count' => $this->questions_count,
         ]);
 
         // Показуємо повідомлення про успіх (залишаємось на сторінці)

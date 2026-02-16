@@ -16,7 +16,7 @@ class ManageAttempts extends Component
     public $selectedUserId = null;
     public $bonusAttempts = 1;
     public $showModal = false;
-    public $actionType = ''; // 'reset' або 'add'
+    public $actionType = ''; // 'reset', 'add', або 'reset_all'
 
     public function openModal($userId, $action)
     {
@@ -24,6 +24,12 @@ class ManageAttempts extends Component
         $this->actionType = $action;
         $this->showModal = true;
         $this->bonusAttempts = 1;
+    }
+
+    public function openResetAllModal()
+    {
+        $this->actionType = 'reset_all';
+        $this->showModal = true;
     }
 
     public function closeModal()
@@ -77,6 +83,32 @@ class ManageAttempts extends Component
         $attempt->addBonusAttempts($this->bonusAttempts);
 
         session()->flash('success', "Додано {$this->bonusAttempts} додаткових спроб!");
+        $this->closeModal();
+    }
+
+    public function resetAllAttempts()
+    {
+        // Отримуємо всіх користувачів з роллю user
+        $users = User::role('user')->get();
+        $resetCount = 0;
+
+        foreach ($users as $user) {
+            $attempt = UserTestAttempt::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'test_id' => $this->test->id,
+                ],
+                [
+                    'attempts_used' => 0,
+                    'bonus_attempts' => 0,
+                ]
+            );
+
+            $attempt->resetAttempts();
+            $resetCount++;
+        }
+
+        session()->flash('success', "Спроби обнулено для {$resetCount} користувачів!");
         $this->closeModal();
     }
 
